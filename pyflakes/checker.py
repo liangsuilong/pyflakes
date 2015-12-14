@@ -428,17 +428,19 @@ class Checker(object):
             for value in scope.values():
                 if isinstance(value, Importation):
                     used = value.used or value.name in all_names
-                    if not used:
-                        messg = messages.UnusedImport
-                        self.report(messg, value.source, value.name)
+                    #if not used:
+                    #    messg = messages.UnusedImport
+                    #    self.report(messg, value.source, value.name)
                     for node in value.redefined:
-                        if isinstance(self.getParent(node), ast.For):
-                            messg = messages.ImportShadowedByLoopVar
-                        elif used:
+                       #if isinstance(self.getParent(node), ast.For):
+                       #    messg = messages.ImportShadowedByLoopVar
+                       #    self.report(messg, node, value.name, value.source)
+                       #elif used:
+                        if used:
                             continue
-                        else:
-                            messg = messages.RedefinedWhileUnused
-                        self.report(messg, node, value.name, value.source)
+                       #else:
+                       #    messg = messages.RedefinedWhileUnused
+                       #self.report(messg, node, value.name, value.source)
 
     def pushScope(self, scopeClass=FunctionScope):
         self.scopeStack.append(scopeClass())
@@ -499,21 +501,22 @@ class Checker(object):
         if existing and not self.differentForks(node, existing.source):
 
             parent_stmt = self.getParent(value.source)
-            if isinstance(existing, Importation) and isinstance(parent_stmt, ast.For):
-                self.report(messages.ImportShadowedByLoopVar,
-                            node, value.name, existing.source)
+           #if isinstance(existing, Importation) and isinstance(parent_stmt, ast.For):
+           #    self.report(messages.ImportShadowedByLoopVar,
+           #                node, value.name, existing.source)
 
-            elif scope is self.scope:
-                if (isinstance(parent_stmt, ast.comprehension) and
-                        not isinstance(self.getParent(existing.source),
-                                       (ast.For, ast.comprehension))):
-                    self.report(messages.RedefinedInListComp,
-                                node, value.name, existing.source)
-                elif not existing.used and value.redefines(existing):
-                    self.report(messages.RedefinedWhileUnused,
-                                node, value.name, existing.source)
+           #elif scope is self.scope:
+               #if (isinstance(parent_stmt, ast.comprehension) and
+               #        not isinstance(self.getParent(existing.source),
+               #                       (ast.For, ast.comprehension))):
+               #    self.report(messages.RedefinedInListComp,
+               #                node, value.name, existing.source)
+               #elif not existing.used and value.redefines(existing):
+               #    self.report(messages.RedefinedWhileUnused,
+               #                node, value.name, existing.source)
 
-            elif isinstance(existing, Importation) and value.redefines(existing):
+           #elif isinstance(existing, Importation) and value.redefines(existing):
+            if isinstance(existing, Importation) and value.redefines(existing):
                 existing.redefined.append(node)
 
         if value.name in self.scope:
@@ -965,7 +968,7 @@ class Checker(object):
                 """
                 for name, binding in self.scope.unusedAssignments():
                     self.report(messages.UnusedVariable, binding.source, name)
-            self.deferAssignment(checkUnusedAssignments)
+            #self.deferAssignment(checkUnusedAssignments)
 
             if PY32:
                 def checkReturnWithArgumentInsideGenerator():
@@ -1057,16 +1060,16 @@ class Checker(object):
                 if alias.name not in __future__.all_feature_names:
                     self.report(messages.FutureFeatureNotDefined,
                                 node, alias.name)
-            elif alias.name == '*':
-                # Only Python 2, local import * is a SyntaxWarning
-                if not PY2 and not isinstance(self.scope, ModuleScope):
-                    self.report(messages.ImportStarNotPermitted,
-                                node, node.module)
-                    continue
+           #elif alias.name == '*':
+           #    # Only Python 2, local import * is a SyntaxWarning
+           #    if not PY2 and not isinstance(self.scope, ModuleScope):
+           #        self.report(messages.ImportStarNotPermitted,
+           #                    node, node.module)
+           #        continue
 
-                self.scope.importStarred = True
-                self.report(messages.ImportStarUsed, node, node.module)
-                importation = StarImportation(node.module, node)
+           #    self.scope.importStarred = True
+           #    self.report(messages.ImportStarUsed, node, node.module)
+           #    importation = StarImportation(node.module, node)
             else:
                 importation = Importation(name, node)
             self.addBinding(node, importation)
